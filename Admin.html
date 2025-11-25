@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Courses Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --primary: #4663ff;
+      --primary-soft: #e2e7ff;
+      --text-main: #1f2933;
+      --text-muted: #6b7280;
+      --card-bg: #ffffff;
+      --border-soft: #e5e7eb;
+      --danger-soft: #fee2e2;
+      --danger: #ef4444;
+      --success-soft: #dcfce7;
+      --success: #16a34a;
+      --warning-soft: #fef3c7;
+      --warning: #d97706;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 240px;
+      background: #020617;
+      color: #e5e7eb;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      inset-block: 0;
+      left: 0;
+      z-index: 20;
+      transition: transform 0.2s ease-out;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .sidebar-logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #4f46e5, #22d3ee);
+    }
+
+    .sidebar-logo-text {
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      font-size: 15px;
+    }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #9ca3af;
+      margin: 12px 4px 6px;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .nav-item {
+      margin-bottom: 4px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 10px;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #d1d5db;
+      transition: background 0.15s, color 0.15s, transform 0.08s;
+    }
+
+    .nav-link span.icon {
+      width: 18px;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    .nav-link:hover {
+      background: #111827;
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .nav-link.active {
+      background: #1d283a;
+      color: #ffffff;
+      border: 1px solid rgba(248, 250, 252, 0.16);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      font-size: 12px;
+      color: #9ca3af;
+      border-top: 1px solid #1f2937;
+      padding-top: 12px;
+    }
+
+    /* OVERLAY (MOBILE) */
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 15;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease-out;
+    }
+
+    .sidebar-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* MAIN AREA */
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      height: 60px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .topbar-texts {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .topbar-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar-search {
+      position: relative;
+    }
+
+    .topbar-search input {
+      padding: 7px 10px 7px 26px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      font-size: 13px;
+      outline: none;
+      background: #f9fafb;
+    }
+
+    .topbar-search-icon {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #4f46e5, #22d3ee);
+    }
+
+    .topbar-menu-btn {
+      display: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      align-items: center;
+      justify-content: center;
+      background: #f9fafb;
+      cursor: pointer;
+    }
+
+    .topbar-menu-btn span {
+      display: block;
+      width: 16px;
+      height: 2px;
+      background: #111827;
+      position: relative;
+    }
+
+    .topbar-menu-btn span::before,
+    .topbar-menu-btn span::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 16px;
+      height: 2px;
+      background: #111827;
+    }
+
+    .topbar-menu-btn span::before {
+      top: -5px;
+    }
+
+    .topbar-menu-btn span::after {
+      top: 5px;
+    }
+
+    .content {
+      padding: 22px 24px 32px;
+    }
+
+    .page-header {
+      margin-bottom: 18px;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .page-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* CARDS + GRID */
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 16px 18px;
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.03);
+    }
+
+    .card-title {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .card-value {
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .card-chip {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      margin-left: 8px;
+    }
+
+    .card-muted {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* TABLES */
+    .table-card {
+      margin-top: 22px;
+    }
+
+    .table-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .table-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .table-filters {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 600px;
+    }
+
+    thead {
+      background: #f9fafb;
+    }
+
+    th,
+    td {
+      padding: 9px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    th {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .badge-pending {
+      background: var(--warning-soft);
+      color: var(--warning);
+    }
+
+    .badge-approved {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+
+    .badge-rejected {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .badge-draft {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .btn,
+    .btn-primary,
+    .btn-ghost,
+    .btn-success,
+    .btn-danger {
+      border-radius: 999px;
+      border: none;
+      font-size: 12px;
+      padding: 6px 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border-soft);
+      color: var(--text-main);
+    }
+
+    .btn-success {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+
+    .btn-danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .btn-tag {
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px dashed var(--border-soft);
+      background: #f9fafb;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #9ca3af;
+    }
+
+    .status-dot.green {
+      background: #22c55e;
+    }
+
+    .status-dot.red {
+      background: #ef4444;
+    }
+
+    .status-dot.amber {
+      background: #f59e0b;
+    }
+
+    .table-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      margin-right: 6px;
+      display: inline-block;
+    }
+
+    .pill {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      white-space: nowrap;
+    }
+
+    .report-card {
+      background: linear-gradient(135deg, #4f46e5, #22d3ee);
+      color: white;
+      border-radius: 16px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .report-card::after {
+      content: "";
+      position: absolute;
+      inset: 40% -40% -40% 40%;
+      background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.16), transparent 55%);
+      opacity: 0.7;
+    }
+
+    .report-card-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .report-metric {
+      font-size: 26px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .report-tag {
+      font-size: 11px;
+      background: rgba(15, 23, 42, 0.35);
+      padding: 4px 10px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    .content-section {
+      display: none;
+    }
+
+    .content-section.active {
+      display: block;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .content {
+        padding-inline: 16px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main {
+        margin-left: 0;
+      }
+
+      .topbar {
+        padding-inline: 12px;
+      }
+
+      .topbar-search {
+        display: none;
+      }
+
+      .topbar-menu-btn {
+        display: flex;
+      }
+
+      .page-title {
+        font-size: 18px;
+      }
+
+      table {
+        min-width: 520px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 14px 14px;
+      }
+
+      .card-value {
+        font-size: 18px;
+      }
+
+      table {
+        min-width: 460px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="layout">
+    <!-- OVERLAY FOR MOBILE -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"></div>
+        <div class="sidebar-logo-text">Courses Admin</div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Main</div>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a class="nav-link active" href="#" data-section="dashboard">
+              <span class="icon">🏠</span>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-section="courses">
+              <span class="icon">📚</span>
+              <span>Courses</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-section="users">
+              <span class="icon">👥</span>
+              <span>Users</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-section="payments">
+              <span class="icon">💳</span>
+              <span>Payments</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-section="reports">
+              <span class="icon">📊</span>
+              <span>Reports</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-footer">
+        Simple admin panel UI<br>
+        For course app project.
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-menu-btn" id="menu-btn">
+            <span></span>
+          </button>
+          <div class="topbar-texts">
+            <div class="topbar-title" id="topbar-title">Dashboard</div>
+            <div class="topbar-subtitle" id="topbar-subtitle">
+              Overview of students, courses and payments.
+            </div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-search">
+            <span class="topbar-search-icon">🔍</span>
+            <input type="text" placeholder="Search in admin...">
+          </div>
+          <div class="avatar"></div>
+        </div>
+      </header>
+
+      <!-- CONTENT -->
+      <section class="content">
+
+        <!-- DASHBOARD SECTION -->
+        <section class="content-section active" data-section="dashboard">
+          <div class="page-header">
+            <div class="page-title">Welcome back, Admin 👋</div>
+            <div class="page-desc">Here is a quick summary of what's happening in your mobile courses app.</div>
+          </div>
+
+          <!-- STAT CARDS -->
+          <div class="grid grid-3">
+            <div class="card">
+              <div class="card-title">Total Students</div>
+              <div class="card-value">
+                1,204
+                <span class="card-chip">+32 this week</span>
+              </div>
+              <div class="card-muted">Active students enrolled in at least one course.</div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Published Courses</div>
+              <div class="card-value">
+                48
+                <span class="card-chip">5 pending review</span>
+              </div>
+              <div class="card-muted">Courses visible inside the mobile app.</div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Total Revenue</div>
+              <div class="card-value">
+                $12,430
+                <span class="card-chip">Last 30 days</span>
+              </div>
+              <div class="card-muted">Including all paid enrollments and renewals.</div>
+            </div>
+          </div>
+
+          <!-- TABLE: COURSES REVIEW -->
+          <div class="card table-card">
+            <div class="table-header">
+              <div class="table-title">Courses waiting for approval</div>
+              <div class="table-filters">
+                <button class="btn-ghost btn-tag">Last 7 days</button>
+                <button class="btn-primary">View all courses</button>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Course</th>
+                    <th>Instructor</th>
+                    <th>Status</th>
+                    <th>Students</th>
+                    <th>Price</th>
+                    <th style="text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div><strong>Learn C++ from Scratch</strong></div>
+                      <div style="font-size:11px; color:var(--text-muted);">Programming · 12 lessons</div>
+                    </td>
+                    <td>
+                      <span class="table-avatar"></span> Ahmed Samir
+                    </td>
+                    <td class="course-status">
+                      <span class="badge badge-pending">
+                        <span class="status-dot amber" style="margin-right:4px;"></span>
+                        Pending
+                      </span>
+                    </td>
+                    <td>238</td>
+                    <td>$19.99</td>
+                    <td style="text-align:right;">
+                      <button class="btn-success" onclick="fakeApprove(this)">✓ Approve</button>
+                      <button class="btn-danger" onclick="fakeReject(this)">✕ Reject</button>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>
+                      <div><strong>UI Design for Beginners</strong></div>
+                      <div style="font-size:11px; color:var(--text-muted);">Design · 9 lessons</div>
+                    </td>
+                    <td>
+                      <span class="table-avatar"></span> Sara Ali
+                    </td>
+                    <td class="course-status">
+                      <span class="badge badge-pending">
+                        <span class="status-dot amber" style="margin-right:4px;"></span>
+                        Pending
+                      </span>
+                    </td>
+                    <td>102</td>
+                    <td>$24.00</td>
+                    <td style="text-align:right;">
+                      <button class="btn-success" onclick="fakeApprove(this)">✓ Approve</button>
+                      <button class="btn-danger" onclick="fakeReject(this)">✕ Reject</button>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>
+                      <div><strong>Introduction to Machine Learning</strong></div>
+                      <div style="font-size:11px; color:var(--text-muted);">AI · 16 lessons</div>
+                    </td>
+                    <td>
+                      <span class="table-avatar"></span> Omar Khaled
+                    </td>
+                    <td class="course-status">
+                      <span class="badge badge-pending">
+                        <span class="status-dot amber" style="margin-right:4px;"></span>
+                        Pending
+                      </span>
+                    </td>
+                    <td>321</td>
+                    <td>$29.00</td>
+                    <td style="text-align:right;">
+                      <button class="btn-success" onclick="fakeApprove(this)">✓ Approve</button>
+                      <button class="btn-danger" onclick="fakeReject(this)">✕ Reject</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TABLE: LATEST STUDENTS -->
+          <div class="card table-card" style="margin-top:18px;">
+            <div class="table-header">
+              <div class="table-title">Latest enrolled students</div>
+              <div class="table-filters">
+                <button class="btn-ghost btn-tag">View all students</button>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Email</th>
+                    <th>Course</th>
+                    <th>Progress</th>
+                    <th style="text-align:right;">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="table-avatar"></span> Mahmoud Adel</td>
+                    <td>mahmoud@example.com</td>
+                    <td>Learn C++ from Scratch</td>
+                    <td>30%</td>
+                    <td style="text-align:right;">
+                      <span class="badge badge-approved">
+                        <span class="status-dot green" style="margin-right:4px;"></span>
+                        Active
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><span class="table-avatar"></span> Nour Hassan</td>
+                    <td>nour@example.com</td>
+                    <td>UI Design for Beginners</td>
+                    <td>15%</td>
+                    <td style="text-align:right;">
+                      <span class="badge badge-approved">
+                        <span class="status-dot green" style="margin-right:4px;"></span>
+                        Active
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><span class="table-avatar"></span> Ali Yasser</td>
+                    <td>ali@example.com</td>
+                    <td>Introduction to Machine Learning</td>
+                    <td>0%</td>
+                    <td style="text-align:right;">
+                      <span class="badge badge-draft">
+                        <span class="status-dot" style="margin-right:4px;"></span>
+                        New
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- COURSES SECTION -->
+        <section class="content-section" data-section="courses">
+          <div class="page-header">
+            <div class="page-title">Courses</div>
+            <div class="page-desc">Manage all courses inside your mobile app.</div>
+          </div>
+
+          <div class="card table-card">
+            <div class="table-header">
+              <div class="table-title">All courses</div>
+              <div class="table-filters">
+                <button class="btn-ghost btn-tag">Filter: All statuses</button>
+                <button class="btn-primary">+ Add new course</button>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Course</th>
+                    <th>Category</th>
+                    <th>Instructor</th>
+                    <th>Status</th>
+                    <th>Students</th>
+                    <th>Price</th>
+                    <th style="text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Learn C++ from Scratch</strong></td>
+                    <td>Programming</td>
+                    <td>Ahmed Samir</td>
+                    <td><span class="badge badge-approved">Published</span></td>
+                    <td>238</td>
+                    <td>$19.99</td>
+                    <td style="text-align:right;">
+                      <button class="btn-ghost">Edit</button>
+                      <button class="btn-danger">Delete</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>UI Design for Beginners</strong></td>
+                    <td>Design</td>
+                    <td>Sara Ali</td>
+                    <td><span class="badge badge-pending">Pending review</span></td>
+                    <td>102</td>
+                    <td>$24.00</td>
+                    <td style="text-align:right;">
+                      <button class="btn-ghost">Edit</button>
+                      <button class="btn-danger">Delete</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>Introduction to Machine Learning</strong></td>
+                    <td>AI</td>
+                    <td>Omar Khaled</td>
+                    <td><span class="badge badge-approved">Published</span></td>
+                    <td>321</td>
+                    <td>$29.00</td>
+                    <td style="text-align:right;">
+                      <button class="btn-ghost">Edit</button>
+                      <button class="btn-danger">Delete</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>Photography Basics</strong></td>
+                    <td>Photography</td>
+                    <td>Laila Hassan</td>
+                    <td><span class="badge badge-draft">Draft</span></td>
+                    <td>0</td>
+                    <td>$15.00</td>
+                    <td style="text-align:right;">
+                      <button class="btn-ghost">Edit</button>
+                      <button class="btn-danger">Delete</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- USERS SECTION -->
+        <section class="content-section" data-section="users">
+          <div class="page-header">
+            <div class="page-title">Users</div>
+            <div class="page-desc">View and manage students and instructors.</div>
+          </div>
+
+          <div class="grid grid-2">
+            <div class="card">
+              <div class="card-title">User overview</div>
+              <div class="card-value">
+                1,320
+                <span class="card-chip">Students &amp; instructors</span>
+              </div>
+              <div class="card-muted">87 instructors · 1,233 students.</div>
+            </div>
+            <div class="card">
+              <div class="card-title">New users this month</div>
+              <div class="card-value">
+                142
+                <span class="card-chip">+12% vs last month</span>
+              </div>
+              <div class="card-muted">Most new users from mobile sign-ups.</div>
+            </div>
+          </div>
+
+          <div class="card table-card">
+            <div class="table-header">
+              <div class="table-title">All users</div>
+              <div class="table-filters">
+                <button class="btn-ghost btn-tag">Role: All</button>
+                <button class="btn-primary">+ Add user</button>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Enrolled courses</th>
+                    <th>Status</th>
+                    <th style="text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="table-avatar"></span> Ahmed Samir</td>
+                    <td>ahmed@example.com</td>
+                    <td><span class="pill">Instructor</span></td>
+                    <td>4 courses</td>
+                    <td><span class="badge badge-approved">Active</span></td>
+                    <td style="text-align:right;">
+                      <button class="btn-ghost">Edit</button>
+                      <button class="btn-danger">Disable</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><span class="table-avatar"></span> Sara Ali</td>
+                    <td>sara@example.com</td>
+                    <td><span class="pill">Instructor</span></td>
+                    <td>3 courses</td>
+                    <td><span class="badge badge-approved">Active</span></td>
+                    <td style="text-align:right;">
+                      <button class="btn-ghost">Edit</button>
+                      <button class="btn-danger">Disable</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><span class="table-avatar"></span> Mahmoud Adel</td>
+                    <td>mahmoud@example.com</td>
+                    <td><span class="pill" style="background:#ecfdf5; color:#047857;">Student</span></td>
+                    <td>2 courses</td>
+                    <td><span class="badge badge-approved">Active</span></td>
+                    <td style="text-align:right;">
+                      <button class="btn-ghost">Edit</button>
+                      <button class="btn-danger">Disable</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><span class="table-avatar"></span> Ali Yasser</td>
+                    <td>ali@example.com</td>
+                    <td><span class="pill" style="background:#ecfdf5; color:#047857;">Student</span></td>
+                    <td>1 course</td>
+                    <td><span class="badge badge-draft">Pending email</span></td>
+                    <td style="text-align:right;">
+                      <button class="btn-ghost">Resend email</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- PAYMENTS SECTION -->
+        <section class="content-section" data-section="payments">
+          <div class="page-header">
+            <div class="page-title">Payments</div>
+            <div class="page-desc">Monitor payments and refunds.</div>
+          </div>
+
+          <div class="grid grid-3">
+            <div class="card">
+              <div class="card-title">Revenue (this month)</div>
+              <div class="card-value">
+                $4,320
+                <span class="card-chip">+8% vs last month</span>
+              </div>
+              <div class="card-muted">From paid enrollments only.</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Successful payments</div>
+              <div class="card-value">
+                183
+                <span class="card-chip">92% success rate</span>
+              </div>
+              <div class="card-muted">Across all payment methods.</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Refunds</div>
+              <div class="card-value">
+                9
+                <span class="card-chip">Within 7 days policy</span>
+              </div>
+              <div class="card-muted">Triggered from mobile app support.</div>
+            </div>
+          </div>
+
+          <div class="card table-card">
+            <div class="table-header">
+              <div class="table-title">Recent payments</div>
+              <div class="table-filters">
+                <button class="btn-ghost btn-tag">Last 30 days</button>
+                <button class="btn-primary">Export CSV</button>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th style="text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Mahmoud Adel</td>
+                    <td>Learn C++ from Scratch</td>
+                    <td>$19.99</td>
+                    <td>Visa</td>
+                    <td>2025-02-10</td>
+                    <td><span class="badge badge-approved">Paid</span></td>
+                    <td style="text-align:right;">
+                      <button class="btn-ghost">View</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Nour Hassan</td>
+                    <td>UI Design for Beginners</td>
+                    <td>$24.00</td>
+                    <td>Mastercard</td>
+                    <td>2025-02-09</td>
+                    <td><span class="badge badge-approved">Paid</span></td>
+                    <td style="text-align:right;">
+                      <button class="btn-ghost">View</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Ali Yasser</td>
+                    <td>Introduction to Machine Learning</td>
+                    <td>$29.00</td>
+                    <td>PayPal</td>
+                    <td>2025-02-08</td>
+                    <td><span class="badge badge-rejected">Refunded</span></td>
+                    <td style="text-align:right;">
+                      <button class="btn-ghost">View</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Ola Samy</td>
+                    <td>Photography Basics</td>
+                    <td>$15.00</td>
+                    <td>Visa</td>
+                    <td>2025-02-06</td>
+                    <td><span class="badge badge-pending">Pending</span></td>
+                    <td style="text-align:right;">
+                      <button class="btn-ghost">View</button>
+                      <button class="btn-danger">Cancel</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- REPORTS SECTION -->
+        <section class="content-section" data-section="reports">
+          <div class="page-header">
+            <div class="page-title">Reports</div>
+            <div class="page-desc">Generate simple KPIs and exportable summaries.</div>
+          </div>
+
+          <div class="grid grid-2">
+            <div class="report-card">
+              <div class="report-card-content">
+                <div style="font-size:13px; opacity:0.9;">Monthly performance</div>
+                <div class="report-metric">78% completion rate</div>
+                <div style="font-size:12px; margin-top:4px; opacity:0.9;">
+                  Students are completing most of their enrolled courses.
+                </div>
+                <div class="report-tag">Top course: Learn C++ from Scratch</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Reporting options</div>
+              <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">
+                Choose what kind of report you want to generate for your final project.
+              </p>
+              <ul style="font-size:13px; padding-left:18px; margin-top:8px;">
+                <li>Students by course &amp; completion rate</li>
+                <li>Revenue per course / per instructor</li>
+                <li>Daily active students (watching time)</li>
+                <li>Most popular categories</li>
+              </ul>
+              <button class="btn-primary" style="margin-top:8px;">Generate sample PDF</button>
+              <button class="btn-ghost" style="margin-top:8px; margin-left:6px;">Download CSV</button>
+            </div>
+          </div>
+
+          <div class="card table-card">
+            <div class="table-header">
+              <div class="table-title">Quick KPIs</div>
+              <div class="table-filters">
+                <button class="btn-ghost btn-tag">This quarter</button>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>KPI</th>
+                    <th>Value</th>
+                    <th>Target</th>
+                    <th>Trend</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Average course rating</td>
+                    <td>4.6 / 5</td>
+                    <td>≥ 4.3</td>
+                    <td><span class="badge badge-approved">On track</span></td>
+                  </tr>
+                  <tr>
+                    <td>Student completion rate</td>
+                    <td>78%</td>
+                    <td>80%</td>
+                    <td><span class="badge badge-pending">Slightly below</span></td>
+                  </tr>
+                  <tr>
+                    <td>Refund rate</td>
+                    <td>3.2%</td>
+                    <td>&lt; 5%</td>
+                    <td><span class="badge badge-approved">Good</span></td>
+                  </tr>
+                  <tr>
+                    <td>New students per month</td>
+                    <td>142</td>
+                    <td>150</td>
+                    <td><span class="badge badge-pending">Almost there</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // عناصر الهامبرجر و السايدبار
+    const menuBtn = document.getElementById('menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    menuBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('visible');
+    });
+
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('visible');
+    });
+
+    // NAV + SECTIONS
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('.content-section');
+    const topbarTitle = document.getElementById('topbar-title');
+    const topbarSubtitle = document.getElementById('topbar-subtitle');
+
+    const subtitles = {
+      dashboard: 'Overview of students, courses and payments.',
+      courses: 'Manage all courses inside your mobile app.',
+      users: 'View and manage students and instructors.',
+      payments: 'Monitor payments and refunds.',
+      reports: 'Generate simple KPIs and exportable summaries.'
+    };
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const section = link.getAttribute('data-section');
+
+        // active nav
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+
+        // show section
+        sections.forEach(sec => {
+          sec.classList.toggle('active', sec.getAttribute('data-section') === section);
+        });
+
+        // update topbar text
+        topbarTitle.textContent = section.charAt(0).toUpperCase() + section.slice(1);
+        topbarSubtitle.textContent = subtitles[section] || '';
+
+        // في الموبايل نقفل المينيو بعد ما يختار
+        if (window.innerWidth <= 900) {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('visible');
+        }
+      });
+    });
+
+    // Demo approve / reject buttons
+    function fakeApprove(btn) {
+      const row = btn.closest('tr');
+      const statusCell = row.querySelector('.course-status');
+      statusCell.innerHTML =
+        '<span class="badge badge-approved"><span class="status-dot green" style="margin-right:4px;"></span>Approved</span>';
+    }
+
+    function fakeReject(btn) {
+      const row = btn.closest('tr');
+      const statusCell = row.querySelector('.course-status');
+      statusCell.innerHTML =
+        '<span class="badge badge-rejected"><span class="status-dot red" style="margin-right:4px;"></span>Rejected</span>';
+    }
+  </script>
+
+</body>
+
+</html>
